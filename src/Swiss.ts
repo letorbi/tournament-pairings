@@ -26,6 +26,12 @@ export function Swiss(players: Player[], round: number, rated: boolean = false, 
     if (seating) {
         playerArray.filter(p => !p.hasOwnProperty('seating')).forEach(p => p.seating = []);
     }
+    let byePlayer = null;
+    if (playerArray.length % 2 === 1) {
+        // TODO Is it required to handle cases where all players already received a bye?
+        byePlayer = playerArray.filter((p) => !p.receivedBye).sort((a,b) => a.score - b.score || a.rating - b.rating)[0];
+        playerArray.splice(playerArray.findIndex((p) => p.id === byePlayer.id), 1);
+    }
     playerArray = shuffle(playerArray);
     playerArray.forEach((p, i) => p.index = i);
     const scoreGroups = [...new Set(playerArray.map(p => p.score))].sort((a, b) => a - b);
@@ -91,10 +97,6 @@ export function Swiss(players: Player[], round: number, rated: boolean = false, 
     do {
         const indexA = playerCopy[0].index;
         const indexB = blossomPairs[indexA];
-        if (indexB === -1) {
-            byeArray.push(playerCopy.splice(0, 1)[0]);
-            continue;
-        }
         playerCopy.splice(0, 1);
         playerCopy.splice(playerCopy.findIndex(p => p.index === indexB), 1);
         let playerA = playerArray.find(p => p.index === indexA);
@@ -118,14 +120,13 @@ export function Swiss(players: Player[], round: number, rated: boolean = false, 
             player2: playerB.id
         });
     } while (playerCopy.length > blossomPairs.reduce((sum: number, idx: number) => idx === -1 ? sum + 1 : sum, 0));
-    byeArray = [...byeArray, ...playerCopy];
-    for (let i = 0; i < byeArray.length; i++) {
+    if (byePlayer !== null) {
         matches.push({
             round: round,
             match: match++,
-            player1: byeArray[i].id,
+            player1: byePlayer.id,
             player2: null
-        })
+        });
     }
     return matches;
 }
