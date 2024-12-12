@@ -1,6 +1,6 @@
 {
     "name": "tournament-pairings",
-    "version": "1.6.0",
+    "version": "1.6.0-swissfix",
     "description": "Functions to generate pairings for tournaments ",
     "main": "./dist/index.js",
     "files": [
